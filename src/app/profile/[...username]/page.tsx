@@ -1,3 +1,4 @@
+"use server";
 import ProfileComponent from "@/components/profile";
 import { Metadata } from "next";
 import { auth } from "../../../../auth";

@@ -11,17 +11,21 @@ generator client {
 model User {
   id            String          @id @default(cuid())
   name          String?
-  username      String?          @unique
-  email         String?          @unique
+  username      String?         @unique
+  email         String?         @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   Authenticator Authenticator[]
+  posts         Post[]
+  likes         PostLike[]      
+  comments      Comment[]       
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
  
 model Account {
   userId            String
@@ -75,4 +79,41 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@id([userId, credentialID])
+}
+
+model Post {
+  id        String    @id @default(cuid())
+  body      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  likes     PostLike[] // Added relation for likes
+  comments  Comment[]  // Added relation for comments
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId]) // Ensures a user can like a post only once
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  postId    String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
