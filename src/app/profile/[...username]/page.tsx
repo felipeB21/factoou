@@ -32,14 +32,24 @@ export default async function ProfilePage({
   params: { username: string };
 }) {
   const session = await auth();
-  const res = await fetch(
+  const userRes = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/profile/${params.username}`
   );
-  const initialUser = res && res.ok ? await res.json() : null;
+  const initialUser = userRes && userRes.ok ? await userRes.json() : null;
+
+  const postsRes = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/post/${params.username}`
+  );
+
+  const userPosts = postsRes && postsRes.ok ? await postsRes.json() : [];
 
   const isHisProfile = session?.user.id === initialUser?.id;
 
   return (
-    <ProfileComponent initialUser={initialUser} isHisProfile={isHisProfile} />
+    <ProfileComponent
+      initialUser={initialUser}
+      isHisProfile={isHisProfile}
+      userPosts={userPosts}
+    />
   );
 }

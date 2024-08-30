@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/header";
 import { Providers } from "./providers";
-import { fonts } from "./fonts";
+import { Rubik } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
+
+const rubik = Rubik({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Factoou",
@@ -17,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${fonts.rubik.className}`}>
+      <body className={`${rubik.className}`}>
         <Providers>
           <NextTopLoader
             color="#FFFF00"

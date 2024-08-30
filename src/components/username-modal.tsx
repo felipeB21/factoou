@@ -12,23 +12,73 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
+  useToast,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { Edit } from "lucide-react";
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
+type FormData = {
+  username: string;
+};
 
 export default function UsernameModal() {
+  const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { register, handleSubmit, reset } = useForm();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>();
+  const toast = useToast();
 
-  const onSubmit = handleSubmit(async (data) => {
-    console.log("submit", data);
-    onClose();
-    reset();
-  });
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    setIsSubmitting(true);
 
-  const initialRef = React.useRef(null);
-  const finalRef = React.useRef(null);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/update`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username: data.username }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || "Failed to update username");
+      }
+
+      toast({
+        title: "Username updated.",
+        description: "Your username has been updated successfully!",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+
+      onClose();
+      reset();
+      router.push(`/profile/${data.username}`);
+    } catch (error) {
+      toast({
+        title: "An error occurred.",
+        description: (error as Error).message || "Failed to update username.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -37,8 +87,6 @@ export default function UsernameModal() {
       </Button>
 
       <Modal
-        initialFocusRef={initialRef}
-        finalFocusRef={finalRef}
         isOpen={isOpen}
         onClose={() => {
           reset();
@@ -50,28 +98,40 @@ export default function UsernameModal() {
           <ModalHeader>Change Username</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <form onSubmit={onSubmit}>
-              <FormControl>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <FormControl isInvalid={!!errors.username}>
                 <FormLabel>New Username</FormLabel>
                 <Input
-                  {...register("username")}
-                  ref={initialRef}
+                  {...register("username", {
+                    required: "Username is required",
+                  })}
                   placeholder="Username"
                 />
+                {errors.username && (
+                  <FormErrorMessage>{errors.username.message}</FormErrorMessage>
+                )}
               </FormControl>
-            </form>
-            <p className="text-sm mt-2 text-stone-600">
-              <strong>Note:</strong> you can only change your username every 30
-              days
-            </p>
-          </ModalBody>
 
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onSubmit}>
-              Save
-            </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  type="submit"
+                  isLoading={isSubmitting}
+                >
+                  Save
+                </Button>
+                <Button
+                  onClick={() => {
+                    reset();
+                    onClose();
+                  }}
+                >
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </form>
+          </ModalBody>
         </ModalContent>
       </Modal>
     </>
