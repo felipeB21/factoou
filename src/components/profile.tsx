@@ -40,7 +40,7 @@ export default function ProfileComponent({
 
   const formattedJoinDate = format(
     new Date(initialUser.createdAt),
-    "MMMM d, yyyy"
+    "MMMM d, yyyy",
   );
 
   function formatPostDate(dateString: string) {
@@ -53,8 +53,8 @@ export default function ProfileComponent({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex gap-5 w-[20dvw]">
+    <div>
+      <div className="flex gap-5">
         <Image
           priority
           src={initialUser.image as string}
@@ -74,12 +74,12 @@ export default function ProfileComponent({
           </p>
         </div>
       </div>
-      <div className="max-w-[25dvw]">
+      <div>
         <ul className="border-t">
           {userPosts && userPosts.length > 0 ? (
             userPosts.map((post) => (
               <li
-                className="border-x border-b p-5 flex items-start"
+                className="border-x border-b px-5 py-8 flex items-start"
                 key={post.id}
               >
                 <Link
@@ -106,7 +106,7 @@ export default function ProfileComponent({
                     <p className="text-sm">{formatPostDate(post.createdAt)}</p>
                   </div>
                   <div className="overflow-hidden mt-0.5">
-                    <p className="text-stone-800 break-words max-w-[25dvw] pr-20">
+                    <p className="text-stone-800 break-words w-[40dvw] pr-10">
                       {post.body}
                     </p>
                   </div>

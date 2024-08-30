@@ -3,6 +3,7 @@ import Image from "next/image";
 import { auth } from "../../auth";
 import TextArea from "./text-area";
 import Link from "next/link";
+import SignInModal from "./modal";
 
 export default async function CreatePost() {
   const session = await auth();
@@ -31,7 +32,12 @@ export default async function CreatePost() {
           </div>
         </div>
       ) : (
-        <></>
+        <div className="flex flex-col place-items-center gap-2">
+          <h5>
+            You are not logged in to send <strong>Factoou's</strong>
+          </h5>
+          <SignInModal />
+        </div>
       )}
     </>
   );

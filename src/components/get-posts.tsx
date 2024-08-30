@@ -63,8 +63,6 @@ function formatDate(dateString: string) {
 export default async function GetPosts() {
   const posts = await fetchPosts();
 
-  console.log(posts);
-
   if (!posts) {
     return <div>Error: Failed to load posts</div>;
   }
@@ -73,7 +71,10 @@ export default async function GetPosts() {
     <div className="max-w-full">
       <ul className="border-t">
         {posts.map((post) => (
-          <li className="border-x border-b p-5 flex items-start" key={post.id}>
+          <li
+            className="border-x border-b px-5 py-8 flex items-start"
+            key={post.id}
+          >
             <Link
               href={`/profile/${post.user.username}`}
               className="flex-shrink-0"
@@ -98,7 +99,7 @@ export default async function GetPosts() {
                 <p className="text-sm">{formatDate(post.createdAt)}</p>
               </div>
               <div className="overflow-hidden mt-0.5">
-                <p className="text-stone-800 break-words max-w-[25dvw] pr-20">
+                <p className="text-stone-800 break-words w-[40dvw] pr-10">
                   {post.body}
                 </p>
               </div>

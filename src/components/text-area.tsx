@@ -60,7 +60,7 @@ export default function TextArea() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <FormControl>
         <Textarea
-          placeholder="Tell us the factoou of the day"
+          placeholder="Tell us the Factoou of the day"
           size="sm"
           resize="none"
           {...register("body", { required: true })}
