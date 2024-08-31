@@ -12,8 +12,8 @@ const NAV_LINKS = [
     icon: <Flame className="h-8 w-8 p-2" />,
   },
   {
-    name: "Pricing",
-    href: "/pricing",
+    name: "Premium",
+    href: "/premium",
     icon: <Stars className="h-8 w-8 p-2" />,
   },
 ];

@@ -72,11 +72,14 @@ function formatDate(dateString: string) {
 }
 
 export default async function GetPosts() {
-  const session = await auth();
   const posts = await fetchPosts();
 
   if (!posts) {
     return <div>Error: Failed to load posts</div>;
+  }
+
+  if (posts.length === 0) {
+    return <div>No posts available</div>;
   }
 
   return (

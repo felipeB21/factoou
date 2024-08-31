@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { format } from "date-fns";
 import { CalendarDays } from "lucide-react";
+import UsernameModal from "./username-modal";
 
 interface ProfileProps {
   initialUser: {
@@ -27,6 +28,7 @@ export default function ProfileComponent({
     new Date(initialUser.createdAt),
     "MMMM d, yyyy"
   );
+
   return (
     <div className="flex justify-between">
       <div className="flex gap-3 sticky">
@@ -38,7 +40,10 @@ export default function ProfileComponent({
           className="rounded-full w-auto h-auto"
         />
         <div>
-          <h3 className="text-xl font-bold">{initialUser.username}</h3>
+          <div className="flex items-center">
+            <h3 className="text-xl font-bold">@{initialUser.username}</h3>
+            {isHisProfile ? <UsernameModal /> : ""}
+          </div>
           <p className="text-sm text-gray-500 flex items-center gap-1">
             <CalendarDays className="w-4 h-4" />
             Joined on {formattedUserCreatedAt}

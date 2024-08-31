@@ -82,7 +82,7 @@ export default function UsernameModal() {
 
   return (
     <>
-      <Button onClick={onOpen}>
+      <Button onClick={onOpen} variant="outline" border="none" size="sm">
         <Edit className="w-4 h-4" />
       </Button>
 

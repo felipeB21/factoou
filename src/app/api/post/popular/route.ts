@@ -3,26 +3,37 @@ import { prisma } from "../../../../../prisma";
 
 export async function GET(req: NextRequest) {
   try {
+    // Get today's date
     const today = new Date();
-    const todayStart = new Date(
+    const startOfDay = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate()
     );
-    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000 - 1); // Include entire day
+    const endOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
 
+    // Fetch the post with most likes for today
     const post = await prisma.post.findFirst({
       where: {
         createdAt: {
-          gte: todayStart,
-          lte: todayEnd,
+          gte: startOfDay,
+          lt: endOfDay,
         },
       },
-      orderBy: {
-        likes: {
-          _count: "desc",
+      orderBy: [
+        {
+          likes: {
+            _count: "desc",
+          },
         },
-      },
+        {
+          createdAt: "asc",
+        },
+      ],
       include: {
         _count: {
           select: {

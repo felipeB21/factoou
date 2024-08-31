@@ -21,7 +21,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: "User not found - Factoou",
+    title: "Profile - Factoou",
     description: "User not found",
   };
 }
@@ -38,12 +38,20 @@ export default async function ProfilePage({
   const initialUser = userRes && userRes.ok ? await userRes.json() : null;
 
   const postsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/post/${params.username}`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/post/user/${params.username}`
   );
 
   const userPosts = postsRes && postsRes.ok ? await postsRes.json() : [];
 
   const isHisProfile = session?.user.id === initialUser?.id;
+
+  if (!initialUser)
+    return (
+      <div className="flex flex-col items-center justify-center h-[50dvh]">
+        <h4 className="text-2xl font-medium">This account doesn’t exist</h4>
+        <p>Try searching for another.</p>
+      </div>
+    );
 
   return (
     <ProfileComponent

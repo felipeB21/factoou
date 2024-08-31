@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 interface User {
   id: string;
@@ -77,16 +78,20 @@ export default async function Hero() {
         <div className="mt-10">
           <div>
             <div className="flex gap-3 items-center">
-              <Image
-                className="rounded-full w-20 h-20 object-cover"
-                src={post.user.image}
-                alt="avatar"
-                width={100}
-                height={100}
-              />
+              <Link href={`/profile/${post.user.username}`}>
+                <Image
+                  className="rounded-full w-20 h-20 object-cover"
+                  src={post.user.image}
+                  alt="avatar"
+                  width={100}
+                  height={100}
+                />
+              </Link>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold">@{post.user.username}</h2>
+                  <Link href={`/profile/${post.user.username}`}>
+                    <h2 className="text-xl font-bold">@{post.user.username}</h2>
+                  </Link>
                   <p className="text-sm text-stone-300">|</p>
                   <p className="text-sm">{formatDate(post.createdAt)}</p>
                 </div>
