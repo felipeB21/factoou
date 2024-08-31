@@ -1,6 +1,9 @@
+"use server";
 import Image from "next/image";
 import Link from "next/link";
-import { format, formatDistanceToNow } from "date-fns";
+import { MessageCircle } from "lucide-react";
+import LikeButton from "./like-button";
+import { auth } from "../../auth";
 
 interface User {
   id: string;
@@ -8,19 +11,33 @@ interface User {
   image: string;
 }
 
+interface Like {
+  id: string;
+  userId: string;
+  postId: string;
+}
+
 interface Post {
   id: string;
   body: string;
   createdAt: string;
   user: User;
+  _count: {
+    likes: number;
+    comments: number;
+  };
+  likedByCurrentUser: boolean;
 }
 
 async function fetchPosts(): Promise<Post[] | null> {
   try {
+    const session = await auth();
+    const userId = session?.user?.id;
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/post`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "User-Id": userId || "",
       },
       cache: "no-store",
     });
@@ -68,13 +85,10 @@ export default async function GetPosts() {
   }
 
   return (
-    <div className="max-w-full">
+    <div className="w-[40dvw]">
       <ul className="border-t">
         {posts.map((post) => (
-          <li
-            className="border-x border-b px-5 py-8 flex items-start"
-            key={post.id}
-          >
+          <li className="border-x border-b p-5 flex items-start" key={post.id}>
             <Link
               href={`/profile/${post.user.username}`}
               className="flex-shrink-0"
@@ -99,9 +113,20 @@ export default async function GetPosts() {
                 <p className="text-sm">{formatDate(post.createdAt)}</p>
               </div>
               <div className="overflow-hidden mt-0.5">
-                <p className="text-stone-800 break-words w-[40dvw] pr-10">
+                <p className="text-stone-800 break-words w-[35dvw] pr-10">
                   {post.body}
                 </p>
+              </div>
+              <div className="flex items-center gap-4 mt-3">
+                <LikeButton
+                  initialLikedByUser={post.likedByCurrentUser}
+                  postId={post.id}
+                  initialLikes={post._count.likes}
+                />
+                <button className="text-sm text-stone-700 hover:text-yellow-500 flex items-center gap-1">
+                  <MessageCircle className="h-4 w-4" />
+                  {post._count.comments}
+                </button>
               </div>
             </div>
           </li>

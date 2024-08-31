@@ -34,7 +34,7 @@ export default async function CreatePost() {
       ) : (
         <div className="flex flex-col place-items-center gap-2">
           <h5>
-            You are not logged in to send <strong>Factoou's</strong>
+            You are not logged in to send <strong>Factoou`s</strong>
           </h5>
           <SignInModal />
         </div>

@@ -1,123 +1,125 @@
 "use client";
-import Image from "next/image";
-import UsernameModal from "./username-modal";
-import { format, formatDistanceToNow } from "date-fns";
-import { Cake } from "lucide-react";
-import { Text } from "@chakra-ui/react";
-import Link from "next/link";
 
-interface User {
-  id: string;
-  username: string | null;
-  image: string | null;
-  createdAt: string;
+import { Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useToast } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
+
+interface LikeButtonProps {
+  postId: string;
+  initialLikes: number;
+  initialLikedByUser: boolean;
 }
 
-interface Post {
-  id: string;
-  body: string;
-  createdAt: string;
-  user: User;
-}
+export default function LikeButton({
+  postId,
+  initialLikes,
+  initialLikedByUser,
+}: LikeButtonProps) {
+  const [likes, setLikes] = useState(initialLikes);
+  const [isLiked, setIsLiked] = useState(initialLikedByUser);
+  const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
 
-export default function ProfileComponent({
-  initialUser,
-  isHisProfile,
-  userPosts,
-}: {
-  initialUser: User | null;
-  isHisProfile: boolean;
-  userPosts: Post[] | null;
-}) {
-  if (!initialUser) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[60dvh]">
-        <p className="text-4xl font-bold">User not found!</p>
-        <p>This user doesn`t exist anymore</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      try {
+        const res = await fetch(`/api/post/${postId}/like/status`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-  const formattedJoinDate = format(
-    new Date(initialUser.createdAt),
-    "MMMM d, yyyy",
-  );
+        if (!res.ok) {
+          throw new Error("Failed to fetch like status");
+        }
 
-  function formatPostDate(dateString: string) {
-    const postDate = new Date(dateString);
-    if (isNaN(postDate.getTime())) {
-      console.error(`Invalid Date: ${dateString}`);
-      return "Invalid date";
+        const data = await res.json();
+        setIsLiked(data.isLiked);
+        setLikes(data.likeCount);
+      } catch (error) {
+        console.error("Error fetching like status:", error);
+      }
+    };
+
+    fetchLikeStatus();
+  }, [postId]);
+
+  async function handleLike() {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/post/${postId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          toast({
+            title: "Log in required.",
+            description: "You need to log in to like posts.",
+            status: "warning",
+            duration: 5000,
+            isClosable: true,
+          });
+        } else {
+          throw new Error("Failed to like/unlike post");
+        }
+        return;
+      }
+
+      const data = await res.json();
+
+      // Update state only if we received valid data
+      if (
+        typeof data.isLiked === "boolean" &&
+        typeof data.likeCount === "number"
+      ) {
+        setIsLiked(data.isLiked);
+        setLikes(data.likeCount);
+      } else {
+        throw new Error("Invalid data received from server");
+      }
+    } catch (error) {
+      console.error("Error liking/unliking post:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again later.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
     }
-    return formatDistanceToNow(postDate, { addSuffix: true });
   }
 
   return (
-    <div>
-      <div className="flex gap-5">
-        <Image
-          priority
-          src={initialUser.image as string}
-          alt={`${initialUser.username}'s profile picture`}
-          width={128}
-          height={128}
-          className="rounded-full w-auto h-auto object-cover"
-        />
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <h3 className="text-2xl font-bold">{initialUser.username}</h3>
-            {isHisProfile && <UsernameModal />}
-          </div>
-          <p className="text-sm font-medium text-neutral-600 flex items-center gap-1">
-            <Cake className="w-5 h-5" />
-            Joined on {formattedJoinDate}
-          </p>
-        </div>
-      </div>
-      <div>
-        <ul className="border-t">
-          {userPosts && userPosts.length > 0 ? (
-            userPosts.map((post) => (
-              <li
-                className="border-x border-b px-5 py-8 flex items-start"
-                key={post.id}
-              >
-                <Link
-                  href={`/profile/${post.user.username}`}
-                  className="flex-shrink-0"
-                >
-                  <Image
-                    src={post.user.image as string}
-                    alt={`${post.user.username}'s avatar`}
-                    width={32}
-                    height={32}
-                    className="rounded-full object-cover"
-                  />
-                </Link>
-                <div className="flex flex-col flex-1 ml-2">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/profile/${post.user.username}`}
-                      className="font-medium"
-                    >
-                      {post.user.username}
-                    </Link>
-                    <p className="text-sm text-stone-300">|</p>
-                    <p className="text-sm">{formatPostDate(post.createdAt)}</p>
-                  </div>
-                  <div className="overflow-hidden mt-0.5">
-                    <p className="text-stone-800 break-words w-[40dvw] pr-10">
-                      {post.body}
-                    </p>
-                  </div>
-                </div>
-              </li>
-            ))
-          ) : (
-            <Text>No posts available</Text>
-          )}
-        </ul>
-      </div>
-    </div>
+    <button
+      onClick={handleLike}
+      className={`text-sm flex items-center gap-1 ${
+        isLiked ? "text-yellow-500" : "text-stone-700"
+      } hover:text-yellow-500 transition-colors duration-200`}
+      aria-label={`${
+        isLiked ? "Unlike" : "Like"
+      } post. Current likes: ${likes}`}
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <Spinner size="xs" />
+      ) : (
+        <>
+          <Heart
+            className={`h-4 w-4 ${
+              isLiked ? "fill-yellow-500" : "fill-none"
+            } stroke-current`}
+          />
+          <span>{likes}</span>
+        </>
+      )}
+    </button>
   );
 }

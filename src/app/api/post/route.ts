@@ -75,6 +75,7 @@ export async function GET(req: NextRequest) {
         body: true,
         createdAt: true,
         userId: true,
+        _count: true,
         user: {
           select: {
             id: true,
