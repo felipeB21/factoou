@@ -1,20 +1,14 @@
-"use server";
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import LikeButton from "./like-button";
 import { auth } from "../../auth";
+import PostMenu from "./post-menu";
 
 interface User {
   id: string;
   username: string;
   image: string;
-}
-
-interface Like {
-  id: string;
-  userId: string;
-  postId: string;
 }
 
 interface Post {
@@ -49,7 +43,7 @@ async function fetchPosts(): Promise<Post[] | null> {
     const data = await res.json();
     return data;
   } catch (error) {
-    console.error(error);
+    console.error("Failed to fetch posts:", error);
     return null;
   }
 }
@@ -78,6 +72,7 @@ function formatDate(dateString: string) {
 }
 
 export default async function GetPosts() {
+  const session = await auth();
   const posts = await fetchPosts();
 
   if (!posts) {
@@ -85,10 +80,13 @@ export default async function GetPosts() {
   }
 
   return (
-    <div className="w-[40dvw]">
+    <div className="w-[40dvw] xl:w-auto">
       <ul className="border-t">
         {posts.map((post) => (
-          <li className="border-x border-b p-5 flex items-start" key={post.id}>
+          <li
+            className="border-x border-b p-5 flex items-start w-[40dvw] xl:w-auto"
+            key={post.id}
+          >
             <Link
               href={`/profile/${post.user.username}`}
               className="flex-shrink-0"
@@ -102,28 +100,31 @@ export default async function GetPosts() {
               />
             </Link>
             <div className="flex flex-col flex-1 ml-2">
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/profile/${post.user.username}`}
-                  className="font-medium"
-                >
-                  {post.user.username}
-                </Link>
-                <p className="text-sm text-stone-300">|</p>
-                <p className="text-sm">{formatDate(post.createdAt)}</p>
+              <div className="flex items-center justify-between pr-10">
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/profile/${post.user.username}`}
+                    className="font-medium"
+                  >
+                    @{post.user.username}
+                  </Link>
+                  <p className="text-sm text-stone-300">|</p>
+                  <p className="text-sm">{formatDate(post.createdAt)}</p>
+                </div>
+                <PostMenu post={post} />
               </div>
               <div className="overflow-hidden mt-0.5">
-                <p className="text-stone-800 break-words w-[35dvw] pr-10">
+                <p className="text-stone-800 break-words w-[35dvw] xl:w-[25dvw] pr-10">
                   {post.body}
                 </p>
               </div>
               <div className="flex items-center gap-4 mt-3">
                 <LikeButton
-                  initialLikedByUser={post.likedByCurrentUser}
                   postId={post.id}
                   initialLikes={post._count.likes}
+                  initialLikedByUser={post.likedByCurrentUser}
                 />
-                <button className="text-sm text-stone-700 hover:text-yellow-500 flex items-center gap-1">
+                <button className="text-sm text-neutral-600 hover:text-yellow-500 flex items-center gap-1">
                   <MessageCircle className="h-4 w-4" />
                   {post._count.comments}
                 </button>

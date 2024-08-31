@@ -25,7 +25,7 @@ export default async function CreatePost() {
                   width={32}
                   height={32}
                 />
-                <p className="font-medium">{username}</p>
+                <p className="font-medium">@{username}</p>
               </div>
             </Link>
             <TextArea />

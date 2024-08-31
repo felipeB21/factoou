@@ -9,10 +9,15 @@ export async function POST(
   const session = await auth();
   try {
     const postId = params.id;
-
     const userId = session?.user.id;
 
-    if (!userId) return NextResponse.redirect("/login");
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const existingLike = await prisma.postLike.findUnique({
       where: {
         userId_postId: {
@@ -22,6 +27,7 @@ export async function POST(
       },
     });
 
+    let isLiked: boolean;
     if (existingLike) {
       await prisma.postLike.delete({
         where: {
@@ -31,11 +37,7 @@ export async function POST(
           },
         },
       });
-
-      return NextResponse.json(
-        { message: "Post unliked successfully" },
-        { status: 200 }
-      );
+      isLiked = false;
     } else {
       await prisma.postLike.create({
         data: {
@@ -43,12 +45,23 @@ export async function POST(
           postId: postId,
         },
       });
-
-      return NextResponse.json(
-        { message: "Post liked successfully" },
-        { status: 201 }
-      );
+      isLiked = true;
     }
+
+    const likeCount = await prisma.postLike.count({
+      where: { postId: postId },
+    });
+
+    return NextResponse.json(
+      {
+        message: isLiked
+          ? "Post liked successfully"
+          : "Post unliked successfully",
+        isLiked: isLiked,
+        likeCount: likeCount,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error processing like:", error);
     return NextResponse.json(

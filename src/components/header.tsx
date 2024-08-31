@@ -21,7 +21,7 @@ const NAV_LINKS = [
 export default function Header() {
   return (
     <header className="py-3 fixed top-0 w-full z-50 shadow bg-stone-50 bg-[linear-gradient(to_bottom, rgba(255,255,255,1), rgba(255,255,150,0.2))]">
-      <div className="flex items-center justify-between max-w-7xl mx-auto px-10">
+      <div className="flex items-center justify-between max-w-7xl xl:max-w-6xl mx-auto px-10">
         <div className="flex items-center gap-10">
           <Link href={"/"}>
             <Image

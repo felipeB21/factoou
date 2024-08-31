@@ -34,7 +34,9 @@ export default function RootLayout({
             showAtBottom={false}
           />
           <Header />
-          <div className="mt-32 max-w-7xl mx-auto px-10">{children}</div>
+          <div className="mt-32 max-w-7xl xl:max-w-6xl mx-auto px-10">
+            {children}
+          </div>
         </Providers>
       </body>
     </html>
