@@ -69,6 +69,7 @@ function formatDate(dateString: string) {
 
 export default async function Hero() {
   const post = await fetchPost();
+
   return (
     <div className="bg-white bg-[radial-gradient(circle_at_center,rgba(255,255,153,0.3)_0%,rgba(255,255,255,0)_100%)]">
       <h1 className="text-5xl font-bold uppercase">

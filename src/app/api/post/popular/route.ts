@@ -3,43 +3,20 @@ import { prisma } from "../../../../../prisma";
 
 export async function GET(req: NextRequest) {
   try {
-    // Get today's date
-    const today = new Date();
-    const startOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-    const endOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1
-    );
-
-    // Fetch the post with most likes for today
+    // Encuentra el post con el mayor número de likes recalculando los likes actuales
     const post = await prisma.post.findFirst({
       where: {
-        createdAt: {
-          gte: startOfDay,
-          lt: endOfDay,
+        likes: {
+          some: {}, // Solo posts que tienen al menos un like
         },
       },
-      orderBy: [
-        {
-          likes: {
-            _count: "desc",
-          },
+      orderBy: {
+        likes: {
+          _count: "desc", // Ordena los posts por la cantidad de likes recalculados
         },
-        {
-          createdAt: "asc",
-        },
-      ],
+      },
       include: {
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
+        likes: true, // Asegúrate de incluir los likes
         user: {
           select: {
             id: true,
@@ -52,14 +29,22 @@ export async function GET(req: NextRequest) {
 
     if (!post) {
       return NextResponse.json(
-        { message: "No posts found today" },
+        { message: "No posts found with likes" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(post);
+    const recalculatedLikes = post.likes.length;
+    console.log(post);
+
+    return NextResponse.json({
+      ...post,
+      _count: {
+        likes: recalculatedLikes,
+      },
+    });
   } catch (error) {
-    console.error("Error fetching post with most likes today:", error);
+    console.error("Error fetching post with most likes:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }
